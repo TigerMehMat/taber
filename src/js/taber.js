@@ -290,6 +290,63 @@ const taber = function () {
         }
 
         /**
+         * Get event
+         * @param event_name
+         * @returns {Event}
+         */
+        const getEvent = function (event_name) {
+                let event;
+                try {
+                        event = new Event(event_name);
+                } catch ($e) {
+                        event = document.createEvent('Event');
+                        event.initEvent(event_name, true, true)
+                }
+                return event;
+        }
+
+        /**
+         * Смотрит есть ли у элемента прокрутка
+         * @param {HTMLElement} element
+         * @return {boolean}
+         */
+        const checkElementOverflowing = function (element) {
+                if (!element) return false;
+                const rect = element.getBoundingClientRect();
+                return Math.round(rect.left + rect.right) < window.innerWidth;
+        }
+
+        /**
+         * Прокрутить элемент до видимой части
+         * @param {HTMLElement} element
+         */
+        const scrollIntoView = function (element) {
+                if (checkElementOverflowing(element.offsetParent)) {
+                        element.offsetParent.scroll({
+                                left: element.offsetLeft - (element.offsetParent.offsetWidth + element.offsetWidth) / 2,
+                                top: element.offsetTop - (element.offsetParent.offsetHeight + element.offsetHeight) / 2,
+                                behavior: "smooth"
+                        });
+                }
+        }
+
+        /**
+         * Заменяет элемент (например, div)
+         * @param {HTMLElement} element_to_change Элемент, который надо заменить
+         * @param {string} rename_to Новый тег
+         */
+        const changeTag = function (element_to_change, rename_to) {
+                let new_element = $(document.createElement(rename_to));
+
+
+                $.each(element_to_change.attributes, function () {
+                        new_element.attr(this.name, this.value);
+                });
+
+                element_to_change.replaceWith(new_element.get(0));
+        }
+
+        /**
          * Закрыть конкретный таб по пути или присланным элементам
          * @param {jQuery|string} path Путь или элементы.
          * @return {boolean}
@@ -300,8 +357,8 @@ const taber = function () {
                 }
                 const paths_to_close = [];
 
-                const before_close_event = JSHelper.getEvent('before-close-tab');
-                const after_close_event = JSHelper.getEvent('after-close-tab');
+                const before_close_event = getEvent('before-close-tab');
+                const after_close_event = getEvent('after-close-tab');
 
                 const elements_to_open = path.filter((_, el) => {
                         return el.dispatchEvent(before_close_event);
@@ -333,10 +390,10 @@ const taber = function () {
                                                 break;
                                 }
                         })
-                        .find('iframe.youtube-iframe')
-                        .each((_, element) => {
-                                JSHelper.stopVideo(element);
-                        });
+                        // .find('iframe.youtube-iframe')
+                        // .each((_, element) => {
+                        //         JSHelper.stopVideo(element);
+                        // });
 
                 paths_to_close.forEach((value, index, array) => {
                         array[index] = '[data-opentab="' + value + '"]';
@@ -376,13 +433,13 @@ const taber = function () {
                         .trigger('tab-open')
                         .find('div.youtube-iframe:visible')
                         .each((_, element) => {
-                                JSHelper.changeTag(element, 'iframe');
+                                changeTag(element, 'iframe');
                         });
 
                 $(`[data-opentab="${path.filter(':first').data('tab')}"]`)
                         .addClass('tab-title-active')
                         .each((_, element) => {
-                                JSHelper.scrollIntoView(element);
+                                scrollIntoView(element);
                         });
         }
 
