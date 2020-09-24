@@ -21,7 +21,7 @@
     </div>
 </div>
 <div class="example">
-    <h2>Простое использование как табы</h2>
+    <h2>Простое использование как табы на событии change</h2>
     <div>
         <label>
             <input type="radio" name="ex1_1" data-opentab="ex1.1/tab1" class="tab-title-active" checked
@@ -217,7 +217,7 @@
     <div data-tab="ex9/tab3" data-toggle-type="color">Tab3</div>
 </div>
 <div class="example">
-    <h2>Вызов открытия таба из js без событий</h2>
+    <h2>Вызов открытия таба из js</h2>
     <script>
             // Устонавливаем кастомный тригер.
             // В любом месте кода, где уже определен табер,
@@ -236,7 +236,7 @@
                     }
             );
 
-            setInterval(() => {
+            let interval = setInterval(() => {
                     Taber.openParsedPath('ex10/~next');
             }, 2000);
     </script>
