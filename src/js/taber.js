@@ -258,6 +258,19 @@
         const taber = function () {
                 const instance = this;
 
+                let change_types = {
+                        'default': function (el, change_type) {
+                                switch (change_type) {
+                                        case 'close':
+                                                el.classList.remove('tab_active');
+                                                break;
+                                        case 'open':
+                                                el.classList.add('tab_active');
+                                                break;
+                                }
+                        }
+                };
+
                 /**
                  * Получить список непосредственных детей таба
                  * @param {string[]} tab_path Путь родительского таба
@@ -282,10 +295,10 @@
                 };
 
                 /**
-                 * @param {jQuery} $element
+                 * @param {jQuery} elements
                  */
-                const openTab = function ($element) {
-                        const path = $element.data('tab').split('/');
+                const openTab = function (elements) {
+                        const path = elements[0].dataset.tab.split('/');
 
                         // Активируем таб с самого глубокого в сторону самого верхнего
                         path.reverse().forEach(((value, index, array) => {
@@ -303,7 +316,7 @@
                 const getEvent = function (event_name) {
                         let event;
                         try {
-                                event = new Event(event_name);
+                                event = new Event(event_name, {bubbles: true, cancelable: true});
                         } catch ($e) {
                                 event = document.createEvent('Event');
                                 event.initEvent(event_name, true, true)
@@ -336,20 +349,16 @@
                         }
                 }
 
-                /**
-                 * Заменяет элемент (например, div)
-                 * @param {HTMLElement} element_to_change Элемент, который надо заменить
-                 * @param {string} rename_to Новый тег
-                 */
-                const changeTag = function (element_to_change, rename_to) {
-                        let new_element = $(document.createElement(rename_to));
+                const setChange = function (element, close_type) {
 
+                        let current_change_type = element.dataset.toggleType || 'default';
 
-                        $.each(element_to_change.attributes, function () {
-                                new_element.attr(this.name, this.value);
-                        });
+                        if (typeof change_types[current_change_type] === "undefined") {
+                                console.warn(`Не найден тип переключения ${current_change_type}. Будет использован <b>default</b>`);
+                                current_change_type = 'default';
+                        }
 
-                        element_to_change.replaceWith(new_element.get(0));
+                        change_types[current_change_type](element, close_type);
                 }
 
                 /**
@@ -359,52 +368,37 @@
                  */
                 const closeTab = function (path) {
                         if (typeof path === "string") {
-                                path = [...document.querySelector(`[data-tab="${path}"]`)];
+                                path = [...document.querySelectorAll(`[data-tab="${path}"]`)];
                         }
                         const paths_to_close = [];
 
-                        const before_close_event = getEvent('before-close-tab');
-                        const after_close_event = getEvent('after-close-tab');
+                        const before_close_event = getEvent('tab-before-close');
+                        const after_close_event = getEvent('tab-after-close');
 
-                        const elements_to_open = path.filter((el) => {
+                        const elements_to_close = path.filter((el) => {
                                 return el.dispatchEvent(before_close_event);
                         });
 
-                        if (elements_to_open.length === 0) {
+                        if (elements_to_close.length === 0) {
                                 return false;
                         }
 
                         // Активируем таб с самого глубокого в сторону самого верхнего
-                        elements_to_open
+                        elements_to_close
                                 .forEach((element) => {
                                         paths_to_close.push(element.dataset.tab);
-
-                                        switch (element.dataset.toggleType) {
-                                                case 'slide':
-                                                        $(element)
-                                                                .slideUp(window.config.normal_animate_duration || 500, function () {
-                                                                        element.classList.remove('tab_active');
-                                                                        element.styles.display = '';
-                                                                        element.dispatchEvent(after_close_event);
-                                                                });
-                                                        break;
-                                                default:
-                                                        element.classList.remove('tab_active');
-                                                        element.dispatchEvent(after_close_event);
-                                                        break;
-                                        }
-                                })
+                                        setChange(element, 'close');
+                                        element.dispatchEvent(after_close_event);
+                                });
                         // .find('iframe.youtube-iframe')
                         // .each((_, element) => {
                         //         JSHelper.stopVideo(element);
                         // });
 
-                        paths_to_close.forEach((value, index, array) => {
-                                array[index] = '[data-opentab="' + value + '"]';
+                        paths_to_close.forEach((value) => {
+                                [...document.querySelectorAll('[data-opentab="' + value + '"]')]
+                                        .forEach(el => el.classList.remove('tab-title-active'));
                         });
-
-                        $(paths_to_close.join(','))
-                                .removeClass('tab-title-active');
                         return true;
                 }
 
@@ -418,25 +412,13 @@
                         }
                         path
                                 .forEach((element) => {
-                                        switch (element.dataset.toggleType) {
-                                                case 'slide':
-                                                        $(element)
-                                                                .slideDown(window.config.normal_animate_duration || 500, function (e) {
-                                                                        element.classList.add('tab_active');
-                                                                        element.styles.display = '';
-                                                                });
-                                                        break;
-                                                default:
-                                                        element.classList.add('tab_active');
-                                                        break;
-                                        }
-
+                                        setChange(element, 'open');
                                         element.dispatchEvent(getEvent('tab-open'));
                                 })
-                                // .find('div.youtube-iframe:visible') // todo: перенести в настраиваемые модули
-                                // .each((_, element) => {
-                                //         changeTag(element, 'iframe');
-                                // });
+                        // .find('div.youtube-iframe:visible') // todo: перенести в настраиваемые модули
+                        // .each((_, element) => {
+                        //         changeTag(element, 'iframe');
+                        // });
 
                         document.querySelectorAll(`[data-opentab="${path[0].dataset.tab}"]`)
                                 .forEach(el => {
@@ -462,15 +444,12 @@
                  * @param {string[]} real_path Элемент, с который хотим открыть.
                  */
                 instance.openTab = function (real_path) {
-                        let $element = $(`[data-tab="${real_path}"]`);
-                        if ($element.length === 0) {
-                                console.error(`Не удалось найти таб "${real_path}"`);
-                        }
-                        if ($element.length === 0) {
+                        let elements = [...document.querySelectorAll(`[data-tab="${real_path}"]`)];
+                        if (elements.length === 0) {
                                 console.error(`Нет таба для показа!`, real_path);
                                 return;
                         }
-                        openTab($element);
+                        openTab(elements);
                 };
 
                 /**
@@ -492,6 +471,10 @@
                         }
                 }
 
+                instance.setChangeType = function (type_name, callback) {
+                        change_types[type_name] = callback;
+                }
+
                 /**
                  * Инит. Развешивает события на странице.
                  */
@@ -499,7 +482,6 @@
                         document.addEventListener('click', function (e) {
                                 if (e.target.closest('[data-opentab][data-tab-toggle="click"],[data-opentab]:not([data-tab-toggle])')) {
                                         const element = e.target.closest('[data-opentab],a[href],[data-stoptab]');
-                                        console.log(element);
                                         if (element.dataset.opentab) {
                                                 const path = element.dataset.opentab.split('/');
                                                 instance.openParsedPath(path, element.dataset.toggle === 'tab');

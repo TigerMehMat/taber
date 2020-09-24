@@ -3,13 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <title>Taber</title>
+    <link rel="stylesheet" href="styles/taber.css">
 </head>
 <body>
-<button type="button" data-opentab="w/w1">w1</button>
+<button class="tab-title-active" type="button" data-opentab="w/w1">w1</button>
 <button type="button" data-opentab="w/w2">w2</button>
-<div data-tab="w/w1">w1</div>
-<div data-tab="w/w2">w2</div>
+<div class="tab tab_active" data-tab="w/w1" data-toggle-type="slide">w1</div>
+<div class="tab" data-tab="w/w2" data-toggle-type="slide">w2</div>
 <script src="https://yastatic.net/jquery/3.3.1/jquery.min.js"></script>
 <script src="js/taber.js"></script>
+<script>
+        Taber.setChangeType('slide', (el, type) => {
+                switch (type) {
+                        case 'close':
+                                $(el)
+                                        .slideUp(500, function () {
+                                                el.classList.remove('tab_active');
+                                                el.style.display = '';
+                                        });
+                                break;
+                        case 'open':
+                                $(el)
+                                        .slideDown(500, function () {
+                                                el.classList.add('tab_active');
+                                                el.style.display = '';
+                                        });
+                                break;
+                }
+        });
+
+        document.addEventListener('tab-open', function () {
+                console.log('tab-open');
+        });
+
+        document.addEventListener('tab-before-close', function () {
+                console.log('tab-before-close');
+        });
+
+        document.addEventListener('tab-after-close', function () {
+                console.log('tab-after-close');
+        });
+</script>
 </body>
 </html>

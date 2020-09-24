@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Примеры</title>
+    <link rel="stylesheet" href="styles/taber.css">
+    <script src="js/taber.js"></script>
+</head>
+<body>
+<h1>Возможности табов</h1>
+<h2>Простое использование как табы</h2>
+<div>
+    <button type="button" data-opentab="ex1/tab1" class="tab-title-active">Tab title 1</button>
+    <button type="button" data-opentab="ex1/tab2">Tab title 2</button>
+</div>
+<div>
+    <div class="tab tab_active" data-tab="ex1/tab1">Tab content 1</div>
+    <div class="tab" data-tab="ex1/tab2">Tab content 2</div>
+</div>
+<h2>Использование как аккордион</h2>
+<div>
+    <button type="button" data-opentab="ex2/tab1" class="tab-title-active">Accordion title 1</button>
+</div>
+<div>
+    <div class="tab tab_active" data-tab="ex2/tab1">Accordion content 1</div>
+</div>
+<div>
+    <button type="button" data-opentab="ex2/tab2">Accordion title 2</button>
+</div>
+<div>
+    <div class="tab" data-tab="ex2/tab2">Accordion content 2</div>
+</div>
+<h2>Использование как аккордион с возможностью закрыть открытый пункт</h2>
+<div>
+    <button type="button" data-opentab="ex3/tab1" class="tab-title-active" data-toggle="tab">Accordion title 1</button>
+</div>
+<div>
+    <div class="tab tab_active" data-tab="ex3/tab1">Accordion content 1</div>
+</div>
+<div>
+    <button type="button" data-opentab="ex3/tab2" data-toggle="tab">Accordion title 2</button>
+</div>
+<div>
+    <div class="tab" data-tab="ex3/tab2">Accordion content 2</div>
+</div>
+<h2>Использование как аккордион с возможностью открывать и закрывать отдельные пункты</h2>
+<div>
+    <button type="button" data-opentab="ex4.1/tab" class="tab-title-active" data-toggle="tab">
+        Accordion title 1
+    </button>
+</div>
+<div>
+    <div class="tab tab_active" data-tab="ex4.1/tab">Accordion content 1</div>
+</div>
+<div>
+    <button type="button" data-opentab="ex4.2/tab" data-toggle="tab">Accordion title 2</button>
+</div>
+<div>
+    <div class="tab" data-tab="ex4.2/tab">Accordion content 2</div>
+</div>
+<h2>Показать больше / скрыть</h2>
+<div data-tab="ex5/less" class="tab tab_active">
+    <button type="button" data-opentab="ex5/more" class="tab-title-active">Показать больше</button>
+</div>
+<div data-tab="ex5/more" class="tab">
+    Lorem ipsum dolor sit amet, consectetur adipisicing elit. Aliquid architecto at quidem quis voluptatibus. Adipisci,
+    doloribus dolorum earum eius harum, laudantium magni nisi nostrum odit qui quod rem ullam veniam!
+    <button type="button" data-opentab="ex5/less">Показать меньше</button>
+</div>
+</body>
+</html>
