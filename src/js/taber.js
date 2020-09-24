@@ -1,4 +1,10 @@
 (function (document, window) {
+
+        let change_types = {
+                'default': function (el, change_type) {
+                }
+        };
+
         /**
          * Коллекция табов
          */
@@ -258,19 +264,6 @@
         const taber = function () {
                 const instance = this;
 
-                let change_types = {
-                        'default': function (el, change_type) {
-                                switch (change_type) {
-                                        case 'close':
-                                                el.classList.remove('tab_active');
-                                                break;
-                                        case 'open':
-                                                el.classList.add('tab_active');
-                                                break;
-                                }
-                        }
-                };
-
                 /**
                  * Получить список непосредственных детей таба
                  * @param {string[]} tab_path Путь родительского таба
@@ -349,7 +342,7 @@
                         }
                 }
 
-                const setChange = function (element, close_type) {
+                const setChange = function (element, change_type) {
 
                         let current_change_type = element.dataset.toggleType || 'default';
 
@@ -358,7 +351,17 @@
                                 current_change_type = 'default';
                         }
 
-                        change_types[current_change_type](element, close_type);
+
+                        switch (change_type) {
+                                case 'close':
+                                        element.classList.remove('tab_active');
+                                        break;
+                                case 'open':
+                                        element.classList.add('tab_active');
+                                        break;
+                        }
+
+                        change_types[current_change_type](element, change_type);
                 }
 
                 /**
@@ -464,13 +467,18 @@
                         const tab = new TabItem(path[0], path.length);
                         const path_to_open = tab.parsePath(path).result_path;
                         const element = document.querySelector(`[data-tab="${path_to_open}"]`);
-                        if (!element.classList.contains('tab_active')) {
+                        if (!element.classList.contains('tab_active') || !is_close_if_opened) {
                                 instance.openTab(path_to_open);
                         } else if (is_close_if_opened) {
                                 closeTab(path_to_open);
                         }
                 }
 
+                /**
+                 * Длбавление кастомного открытия / закрытия
+                 * @param {string} type_name
+                 * @param {AddTaberChange} callback
+                 */
                 instance.setChangeType = function (type_name, callback) {
                         change_types[type_name] = callback;
                 }
@@ -501,6 +509,12 @@
 
                 init();
         };
+
+        /**
+         * @callback AddTaberChange
+         * @param {HTMLElement} element_to_change
+         * @param {"open"|"close"} change_type
+         */
 
         window.Taber = new taber();
 })(document, window);
